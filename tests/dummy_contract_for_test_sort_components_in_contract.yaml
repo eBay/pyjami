@@ -1,0 +1,12 @@
+openapi: "3.0.0"
+components:
+  schemas:
+    Pet:
+      type: object
+      properties:
+        breeds:
+          $ref: "#/components/schemas/Pet"
+    Pets:
+      type: array
+      items:
+        $ref: "#/components/schemas/Pet"

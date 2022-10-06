@@ -1,0 +1,24 @@
+repos:
+  -   repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.3.0
+      hooks:
+        - id: check-added-large-files # Prevent giant files from being committed
+        - id: check-byte-order-marker # forbid files which have a UTF-8 byte-order marker
+        - id: check-case-conflict # Check for files that would conflict in case-insensitive filesystems
+        - id: check-executables-have-shebangs # Ensures that (non-binary) executables have a shebang.
+        - id: check-json # This hook checks json files for parseable syntax.
+        - id: pretty-format-json # This hook sets a standard for formatting JSON files.
+        - id: check-merge-conflict # Check for files that contain merge conflict strings.
+        - id: check-symlinks # Checks for symlinks which do not point to anything.
+        - id: check-xml # This hook checks xml files for parseable syntax.
+        - id: destroyed-symlinks # Detects symlinks which are changed to regular files with a content of a path which that symlink was pointing to.
+        - id: detect-private-key # Detects the presence of private keys
+        - id: end-of-file-fixer # Ensures that a file is either empty, or ends with one newline.
+        - id: fix-byte-order-marker # removes UTF-8 byte order marker
+        - id: forbid-new-submodules # Prevent addition of new git submodules
+        - id: mixed-line-ending # Replaces or checks mixed line ending
+        - id: trailing-whitespace # This hook trims trailing whitespace.
+  -   repo: https://github.com/psf/black
+      rev: 22.8.0
+      hooks:
+        - id: black

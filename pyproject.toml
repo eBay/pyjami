@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "pyjami"
+version = "0.1.0"
+description = "Migrate Java code with Python."
+authors = ["Mingyang Li <mingyli@ebay.com>"]
+readme = "README.md"
+packages = [{include = "pyjami"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+docopt = "^0.6.2"
+PyYAML = "^6.0"
+pandas = "^1.5.0"
+
+
+[tool.poetry.dev-dependencies]
+pdoc = "^12.2.0"
+coverage-badge = "^1.1.0"
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
