@@ -84,9 +84,7 @@ This repository uses [Poetry](https://python-poetry.org/) for managing dependenc
 
 ### Documentation
 
-Refer to `docs/index.html` for documentation. It's also published as GitHub pages [here](https://pages.github.corp.ebay.com/mingyli/pyjami/pyjami/java_symbol_migration_helpers.html).
-
-<img width="1225" alt="image" src="https://media.github.corp.ebay.com/user/32621/files/428a7ba4-f904-4415-a12d-7f3a82e4dab0">
+Refer to `docs/index.html` for documentation. It's also published as GitHub pages [here](https://opensource.ebay.com/pyjami/pyjami/java_symbol_migration_helpers.html).
 
 Pyjami's documentation is generated via the [`pdoc`](https://pdoc.dev/docs/pdoc.html) tool:
 
@@ -154,3 +152,7 @@ Then, you can update the coverage badge:
 ```shell
 coverage-badge -o coverage.svg
 ```
+
+# License
+
+MIT.
