@@ -155,4 +155,4 @@ coverage-badge -o coverage.svg
 
 # License
 
-MIT.
+Apache 2.0.
