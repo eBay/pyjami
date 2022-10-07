@@ -10,19 +10,59 @@ from pathlib import Path
 import pandas as pd
 
 from collections.abc import Iterable
+from functools import partial
 
 package_declaration_pattern = re.compile(r"\bpackage.+?;\n")
 
 
-def __find_java_files(symbol: str, search_within_directory: Path) -> str:
+def __get_score_in_order_of_preference_for_path(
+    path: Path, order_of_preference: tuple[Path] = tuple()
+) -> int:
+    """
+    Return the index of the first item in `order_of_preference` that is a parent of `path`.
+
+    In the case where none of the candidates is a parent of `path`, return the length -- thus, the max-possible index + 1 -- of the `order_of_preference`.
+
+    For example, when `path` is `b/d/f.java` and `order_of_preference` contains:
+    - `a/`
+    - `b/`
+    - `c/`
+    - `b/d/`
+
+    This function will return `1`, because `b/` (with index `1`) is the first entry in `order_of_preference` that is a parent of `path`.
+
+    See https://stackoverflow.com/a/2364277/15154381.
+    """
+    score_generator = (
+        i
+        for i, candidate in enumerate(order_of_preference)
+        if path.is_relative_to(candidate)
+    )
+    return next(score_generator, len(order_of_preference))
+
+
+def __find_java_files(
+    symbol: str,
+    search_within_directory: Path,
+    order_of_preference: tuple[Path] = tuple(),
+) -> str:
     """Find Java files by name."""
-    paths = search_within_directory.rglob(symbol + ".java")
-    paths = tuple(map(lambda p: p.as_posix(), paths))
-    if len(paths) != 1:
-        logging.warning(f"{len(paths)} paths are found for {symbol}.")
+    paths = tuple(search_within_directory.rglob(symbol + ".java"))
     if len(paths) == 0:
+        logging.warning(f"No path is found for {symbol}.")
         return None
-    return paths[0]
+    if len(paths) > 1:
+        get_score = partial(
+            __get_score_in_order_of_preference_for_path,
+            order_of_preference=order_of_preference,
+        )
+        path = min(paths, key=get_score)
+        logging.warning(
+            f"{len(paths)} paths are found for {symbol}. We will use `{path.as_posix()}`."
+        )
+    else:
+        path = paths[0]
+    return path.as_posix()
 
 
 package_pattern = re.compile("package (?P<name>.+?);")
@@ -42,18 +82,23 @@ def __get_package_name(path: str) -> str:
 
 
 def make_table(
-    symbols_to_migrate: Iterable[str], search_within_directory: Path = Path()
+    symbols_to_migrate: Iterable[str],
+    search_within_directory: Path = Path(),
+    order_of_preference: tuple[Path] = tuple(),
 ) -> pd.DataFrame:
     """
     Gather information about the symbols that are required in the migration process to follow.
 
     Given an iterable (preferably a Pandas Series) of string, each of which being a symbol to migrate, this function returns a Pandas Dataframe with each line indicating the name, the java file path, and the package name of that symbol in the given directory.
+
+    In the case that multiple file paths are found for a given symbol, the first file path that is a child of the firstmost entry in `order_of_preference` is taken. When none is present, it's treated as if no file path is found for this symbol. Therefore, even if you don't have a preference of which directories to favor, you might still want to provide `order_of_preference` with at least a `search_within_directory`, so that at least some choice is taken.
     """
     if type(symbols_to_migrate) != pd.Series:
         symbols_to_migrate = pd.Series(symbols_to_migrate, name="symbol")
     paths = symbols_to_migrate.apply(
         __find_java_files,
         search_within_directory=search_within_directory,
+        order_of_preference=order_of_preference,
     )
     package_names = paths.apply(__get_package_name)
     paths = paths.str.removeprefix(search_within_directory.as_posix() + "/")

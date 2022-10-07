@@ -22,6 +22,7 @@ That's when this toolkit comes to help.
 
 ## Usage
 
+### Migrate one symbol
 Please ensure that you've installed these executable programs:
 
 * `gnu-sed` (installed by default on most Linux distros; a manual step on macOS). This is because the BSD edition of `sed` does not support word boundaries ("`\b`").
@@ -49,7 +50,40 @@ migrate(
 )
 ```
 
-### Background
+### Gather information for a list of symbols to migrate
+
+We provide a `make_table()` function that gathers information about the symbols that are required in the migration process to follow.
+
+Given an iterable (preferably a Pandas Series) of string, each of which being a symbol to migrate, this function returns a Pandas Dataframe with each line indicating the name, the java file path, and the package name of that symbol in the given directory.
+
+For example, if you have `MyProject/Lorem.java` containing:
+
+```java
+package com.example.MyProject;
+
+class Lorem {...}
+```
+
+and you run:
+
+```python
+make_table(
+    symbols_to_migrate=("Lorem",),
+    search_within_directory=pathlib.Path("MyProject/"),
+)
+```
+
+you will get a table with one row of these values:
+
+- `symbol`: `Lorem`
+- `path`: `MyProject/Lorem.java`
+- `package`: `com.example.MyProject`
+
+These are the required information to feed into `migrate()`.
+
+In the case that multiple file paths are found for a given symbol, the first file path that is a child of the firstmost entry in `order_of_preference` is taken. When none is present, it's treated as if no file path is found for this symbol. Therefore, even if you don't have a preference of which directories to favor, you might still want to provide `order_of_preference` with at least a `search_within_directory`, so that at least some choice is taken.
+
+### Extra -- Sorting Components in an OpenAPI Contract
 
 This is a common scenario to encounter when migrating handwritten Java code to a library generated from OpenAPI contract. In fact, this is the original case that kicked off this project.
 

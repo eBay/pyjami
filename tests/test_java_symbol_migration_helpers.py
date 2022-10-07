@@ -10,16 +10,21 @@ from difflib import unified_diff
 
 
 def test_make_table():
+    search_scope = Path(
+        os.path.dirname(__file__),
+        "dummyJavaProject",
+    )
     got = make_table(
         ("Lorem", "Ipsum", "SymbolWithNoJavaCode"),
-        Path(
-            os.path.dirname(__file__),
-            "dummyJavaProject",
+        search_scope,
+        (
+            search_scope / "PreferredLocation",
+            search_scope,
         ),
     ).to_dict()
     assert got == {
-        "package": {0: "com.example.main.dummyJavaProject"},
-        "path": {0: "Lorem.java"},
+        "package": {0: "com.example.main.dummyJavaProject.PreferredLocation"},
+        "path": {0: "PreferredLocation/Lorem.java"},
         "symbol": {0: "Lorem"},
     }
 
