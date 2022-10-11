@@ -2,7 +2,7 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Code Coverage](coverage.svg)](https://github.com/dbrgn/coverage-badge)
-
+[![CodeQL](https://github.com/ebay/pyjami/workflows/CodeQL/badge.svg)](https://github.com/ebay/pyjami/actions?query=workflow%3ACodeQL)
 Python library which helps to automate the migration of Java classes/enums/interfaces.
 
 ## Scenario
