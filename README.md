@@ -4,6 +4,7 @@
 [![Code Coverage](coverage.svg)](https://github.com/dbrgn/coverage-badge)
 [![CodeQL](https://github.com/ebay/pyjami/workflows/CodeQL/badge.svg)](https://github.com/ebay/pyjami/actions?query=workflow%3ACodeQL)
 [![PyPI version](https://badge.fury.io/py/pyjami.svg)](https://badge.fury.io/py/pyjami)
+[![HitCount](https://hits.dwyl.com/ebay/pyjami.svg?style=flat)](http://hits.dwyl.com/ebay/pyjami)
 
 Python library which helps to automate the migration of Java classes/enums/interfaces.
 
