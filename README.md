@@ -190,6 +190,15 @@ Then, you can update the coverage badge:
 coverage-badge -o coverage.svg
 ```
 
+### Releasing
+
+This library is available as a package on PyPI [here](https://pypi.org/project/pyjami/). To release a new version:
+
+1. Bump the version number in `pyproject.toml` with a commit. Please follow [Semantic Versioning 2.0.0](https://semver.org/) specifications.
+2. Create a new release on GitHub [here](https://github.com/eBay/pyjami/releases).
+
+A GitHub workflow will be automatically triggered to build & publish this package to PyPI. Till eBay have an official account on PyPI, this action will keep on using a _PyPI API Token_ associated with Ming's personal PyPI account. The Token is stored on this GitHub repository as an Action Secret.
+
 # License
 
 Apache 2.0.
