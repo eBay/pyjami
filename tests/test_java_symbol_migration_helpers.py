@@ -102,3 +102,8 @@ def test_migrate(tmp_path):
 -import com.example.main.dummyJavaProject.Lorem;
 +import org.instance.new.dummyDestination.Lorem;"""
     )
+
+    diff = __get_diff(
+        "NotReallyAUserOfLorem.java", original_dummy_repo_path, dummy_repo_path
+    )
+    assert diff == """"""

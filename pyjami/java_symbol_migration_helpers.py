@@ -360,7 +360,7 @@ def migrate_usages_at_each_level(
 
         usage = f"{latter_half}.{symbol}".lstrip(".")
         logging.debug(f"Finding `{usage}` in `{former_half}`")
-        usage_pattern = re.compile(f"\\b{usage}\\b")
+        usage_pattern = re.compile(f"\\b(?<!\\.){usage}\\b")
         migrate_wildcard_imports(
             package=former_half,
             usage_pattern=usage_pattern,
