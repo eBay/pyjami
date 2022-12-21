@@ -21,3 +21,12 @@ def test_sort_symbols():
     )
     got = sort_symbols(contract_path)
     assert got == tuple(("Pet", "Pets"))
+
+
+def test_sort_symbols_in_contract_with_cycles():
+    contract_path = os.path.join(
+        os.path.dirname(__file__),
+        "dummy_contract_with_cycle.yaml",
+    )
+    got = sort_symbols(contract_path)
+    assert got == tuple(("C", "B", "A"))

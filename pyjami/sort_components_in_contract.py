@@ -11,7 +11,7 @@ Usage:
 from docopt import docopt
 
 import os
-from graphlib import TopologicalSorter
+from graphlib import TopologicalSorter, CycleError
 import logging
 import yaml
 
@@ -71,13 +71,23 @@ def sort_symbols(contract_path: str) -> tuple[str]:
     g = build_dependency_graph(contract)
 
     # Topologically sort the symbols.
-    sorter = TopologicalSorter(g)
-    symbols_to_migrate_sorted = sorter.static_order()
-    # Clean up.
-    symbols_to_migrate_sorted = filter(
-        lambda x: ".yaml#/" not in x, symbols_to_migrate_sorted
-    )
-    symbols_to_migrate_sorted = tuple(symbols_to_migrate_sorted)
+
+    symbols_to_migrate_sorted = None
+    while symbols_to_migrate_sorted is None:
+        sorter = TopologicalSorter(g)
+        try:
+            symbols_to_migrate_sorted_generator = sorter.static_order()
+            # Clean up.
+            symbols_to_migrate_sorted_filtered = filter(
+                lambda x: ".yaml#/" not in x, symbols_to_migrate_sorted_generator
+            )
+            symbols_to_migrate_sorted = tuple(symbols_to_migrate_sorted_filtered)
+        except CycleError as e:
+            cycle = e.args[1]
+            logging.warning(
+                f"Cycle detected: {' -> '.join(cycle)}. Randomly breaking the cycle by pretending `{cycle[0]}` wasn't a dependency of `{cycle[1]}`."
+            )
+            g[cycle[1]].remove(cycle[0])
 
     symbols_referenced_but_not_in_contract = set(symbols_to_migrate_sorted).difference(
         components_in_contract

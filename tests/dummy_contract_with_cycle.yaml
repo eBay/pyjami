@@ -1,0 +1,18 @@
+openapi: "3.0.0"
+components:
+  schemas:
+    A:
+      type: object
+      properties:
+        b:
+          $ref: "#/components/schemas/B"
+    B:
+      type: object
+      properties:
+        c:
+          $ref: "#/components/schemas/C"
+    C:
+      type: object
+      properties:
+        a:
+          $ref: "#/components/schemas/A"
