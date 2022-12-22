@@ -59,13 +59,14 @@ def build_dependency_graph(contract: dict) -> dict:
 
 
 def sort_symbols(contract_path: str) -> tuple[str]:
+    logger = logging.getLogger("sort symbols")
     with open(contract_path) as f:
         contract = yaml.load(f, Loader=yaml.FullLoader)
 
     # Get a list of all the symbols defined in this contract.
     components_in_contract = set(contract["components"]["schemas"].keys())
 
-    logging.info(
+    logger.info(
         f"There are {len(components_in_contract)} symbols defined in the contract."
     )
     g = build_dependency_graph(contract)
@@ -92,20 +93,20 @@ def sort_symbols(contract_path: str) -> tuple[str]:
     symbols_referenced_but_not_in_contract = set(symbols_to_migrate_sorted).difference(
         components_in_contract
     )
-    logging.info(
+    logger.info(
         f"We want to have {len(symbols_to_migrate_sorted)} symbols migrated. The extra {len(symbols_referenced_but_not_in_contract)} symbols are referenced from other contracts (mostly from the ExperienceTypes library). We will be dealing with them next up in the _Find what symbols are referencable_ section."
     )
     return symbols_to_migrate_sorted
 
 
 if __name__ == "__main__":
+    logger = logging.getLogger("symbol sorter")
     arguments = docopt(__doc__, version="Symbol Sorter")
-    logging.debug(f"Docopt arguments: {arguments}")
 
     # Load the OpenAPI YAML file as a nested dictionary.
     contract_path = arguments["<contract_path>"]
     if not contract_path:
-        logging.warning("`contract_path` not defined. Using default value.")
+        logger.warning("`contract_path` not defined. Using default value.")
         contract_path = os.path.expanduser(
             "~/Projects/scaffold/src/main/resources/contract.yaml"
         )

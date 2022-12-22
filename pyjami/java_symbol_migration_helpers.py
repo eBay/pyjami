@@ -47,9 +47,10 @@ def __find_java_files(
     order_of_preference: tuple[Path] = tuple(),
 ) -> str:
     """Find Java files by name."""
+    logger = logging.getLogger("find java files")
     paths = tuple(search_within_directory.rglob(symbol + ".java"))
     if len(paths) == 0:
-        logging.warning(f"No path is found for {symbol}.")
+        logger.warning(f"No path is found for {symbol}.")
         return None
     if len(paths) > 1:
         get_score = partial(
@@ -57,7 +58,7 @@ def __find_java_files(
             order_of_preference=order_of_preference,
         )
         path = min(paths, key=get_score)
-        logging.warning(
+        logger.warning(
             f"{len(paths)} paths are found for {symbol}. We will use `{path.as_posix()}`."
         )
     else:
@@ -70,13 +71,14 @@ package_pattern = re.compile("package (?P<name>.+?);")
 
 def __get_package_name(path: str) -> str:
     """Get package name from `.java` files."""
+    logger = logging.getLogger("get package name")
     if path is None:
         return None
     with open(path) as f:
         content = f.read()
     match = package_pattern.search(content)
     if match is None:
-        logging.error(f"Didn't find package name in `{path}`.")
+        logger.error(f"Didn't find package name in `{path}`.")
         return None
     return match.group("name")
 
@@ -157,6 +159,7 @@ def migrate_direct_usages(
     repo_dir: Path,
     sed_executable: str,
 ):
+    logger = logging.getLogger("migrate direct usages")
     command = f"rg '{old_fully_qualified_name}\\b' --type java --files-with-matches {repo_dir.as_posix()}"
     result = subprocess.run(command, text=True, shell=True, capture_output=True)
     java_paths = []
@@ -167,7 +170,7 @@ def migrate_direct_usages(
         command = f"{sed_executable} -i 's/{old_fully_qualified_name}\\b/{new_fully_qualified_name}/g' {java_path}"
         result = subprocess.run(command, text=True, shell=True, capture_output=True)
         if result.stderr != "":
-            logging.error(f'Stderr printed: "{result.stderr}"')
+            logger.error(f'Stderr printed: "{result.stderr}"')
 
 
 def replace_in_file(path: str, pattern: re.Pattern, replacement: str) -> int:
@@ -228,7 +231,7 @@ def migrate_wildcard_imports(
 
     You have to install [`ripgrep`](https://github.com/BurntSushi/ripgrep) first.
     """
-
+    logger = logging.getLogger("migrate wildcard imports")
     star_import = f"^import {package}.\\*;$"
     # Find files that import at this level with a wildcard.
     command = (
@@ -240,7 +243,7 @@ def migrate_wildcard_imports(
         java_paths = result.stdout.rstrip(os.linesep).split(os.linesep)
     if len(java_paths) == 0:
         return
-    logging.debug(
+    logger.debug(
         f"Trying to migrate wildcard imports. {len(java_paths)} files contain `{star_import}`."
     )
     # Replace usages of this symbol in each file.
@@ -250,7 +253,7 @@ def migrate_wildcard_imports(
             replace_in_file(java_path, usage_pattern, new_fully_qualified_name)
         )
     count = sum(map(lambda x: x > 0, nums_substitutions))
-    logging.debug(
+    logger.debug(
         f"Modified {count} out of {len(nums_substitutions)} files with wildcard imports, a total of {sum(nums_substitutions)} substitutions."
     )
 
@@ -280,6 +283,7 @@ def migrate_relative_usages(
 
     You have to install [`ripgrep`](https://github.com/BurntSushi/ripgrep) first.
     """
+    logger = logging.getLogger("migrate relative usages")
     package_declaration = f"^package {package};$"
     # Find classes declared in this package.
     command = f"rg '{package_declaration}' --type java --files-with-matches {repo_dir.as_posix()}/"
@@ -288,9 +292,9 @@ def migrate_relative_usages(
     if result.returncode == 0 and len(result.stdout) > 0:
         java_paths = result.stdout.rstrip(os.linesep).split(os.linesep)
     if len(java_paths) == 0:
-        logging.debug("No file found.")
+        logger.debug("No file found.")
         return
-    logging.debug(
+    logger.debug(
         f"Trying to migrate relative usages. {len(java_paths)} files contain `{package_declaration}`."
     )
     # Replace usages of this symbol in each file.
@@ -301,14 +305,14 @@ def migrate_relative_usages(
             content = f.read()
         if not usage_pattern.search(content):
             continue
-        logging.debug(
+        logger.debug(
             f"`{java_path.removeprefix(repo_dir.as_posix()+'/')}` uses this symbol with relative quantifier."
         )
         import_to_add = f"\nimport {new_fully_qualified_name};"
         index = content.rfind("\nimport ")
         if index > 0:
             content = content[:index] + import_to_add + content[index:]
-            logging.debug(
+            logger.debug(
                 "Added import statement after the last existing import statement."
             )
         else:
@@ -316,11 +320,11 @@ def migrate_relative_usages(
                 lambda m: m.group() + import_to_add, content, 1
             )
             if n_sub == 0:
-                logging.warn(
+                logger.warn(
                     "Failed to find a proper place to add the import statement."
                 )
             else:
-                logging.debug("Added import statement after the package declaration.")
+                logger.debug("Added import statement after the package declaration.")
         with open(java_path, "w") as f:
             f.write(content)
 
@@ -353,13 +357,14 @@ def migrate_usages_at_each_level(
 
     You have to install [`ripgrep`](https://github.com/BurntSushi/ripgrep) first.
     """
+    logger = logging.getLogger("migrate usages at each level")
     parts = package.split(".")
     for i in range(1, len(parts) + 1):
         former_half = ".".join(parts[:i])
         latter_half = ".".join(parts[i:])
 
         usage = f"{latter_half}.{symbol}".lstrip(".")
-        logging.debug(f"Finding `{usage}` in `{former_half}`")
+        logger.debug(f"Finding `{usage}` in `{former_half}`")
         usage_pattern = re.compile(f"\\b(?<!\\.){usage}\\b")
         migrate_wildcard_imports(
             package=former_half,
@@ -391,9 +396,10 @@ def migrate(
 
     If `deprecate_only`, the original file at `path` won't be deleted. Instead, it will be marked with `@Deprecated(since="[date and time]", forRemoval=true)`.
     """
+    logger = logging.getLogger("migrate")
     path = os.path.join(repo_dir.as_posix(), path)
     if not os.path.isfile(path):
-        logging.info(f"`{symbol}` is already migrated. Skipping.")
+        logger.info(f"`{symbol}` is already migrated. Skipping.")
         return
     old_fully_qualified_name = f"{old_package}.{symbol}"
     new_fully_qualified_name = f"{new_package}.{symbol}"
@@ -434,11 +440,11 @@ def migrate(
                 is_deprecation_annotated = True
                 break
         if is_deprecation_annotated:
-            logging.debug(f"Inserted deprecation annotation at line `{i}`.")
+            logger.debug(f"Inserted deprecation annotation at line `{i}`.")
             with open(path, "w") as f:
                 f.writelines(lines)
         else:
-            logging.error(
+            logger.error(
                 "Deprecation is requested, but the symbol declaration can't be found in the file."
             )
         return
