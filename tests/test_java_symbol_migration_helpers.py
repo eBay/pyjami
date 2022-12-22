@@ -107,3 +107,35 @@ def test_migrate(tmp_path):
         "NotReallyAUserOfLorem.java", original_dummy_repo_path, dummy_repo_path
     )
     assert diff == """"""
+
+
+def test_migrate_with_deprecation(tmp_path):
+    sed_executable = find_suitable_sed_command()
+    # Fixtures.
+    original_dummy_repo_path = Path(os.path.dirname(__file__), "dummyJavaProject")
+    dummy_repo_path = tmp_path / "dummyJavaProject"
+    dummy_pom_dependency = """
+        <dependency>
+            <groupId>org.instance.new</groupId>
+            <artifactId>dummyDestination</artifactId>
+        </dependency>"""
+    copytree(original_dummy_repo_path.as_posix(), dummy_repo_path.as_posix())
+    # Run the test.
+    original_file_path = dummy_repo_path / "Lorem.java"
+    assert (
+        original_file_path.is_file()
+    ), "The original Java file should present before the migration is attempted."
+    migrate(
+        "Lorem",
+        original_file_path.as_posix(),
+        "com.example.main.dummyJavaProject",
+        "org.instance.new.dummyDestination",
+        tmp_path,
+        dummy_pom_dependency,
+        sed_executable=sed_executable,
+        deprecate_only=True,
+    )
+    assert original_file_path.is_file(), "The original Java file should remain."
+    assert (
+        "@Deprecated(" in original_file_path.read_text()
+    ), "Deprecation annotation should present in the file."

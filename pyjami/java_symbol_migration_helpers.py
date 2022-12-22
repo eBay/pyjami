@@ -8,7 +8,7 @@ import subprocess
 import platform
 from pathlib import Path
 import pandas as pd
-
+from datetime import datetime
 from collections.abc import Iterable
 from functools import partial
 
@@ -384,9 +384,12 @@ def migrate(
     repo_dir: Path,
     pom_dependency: str,
     sed_executable: str = "sed",
+    deprecate_only: bool = False,
 ):
     """
     Migrate all usages of the given `symbol` in the `old_package` (which sits at `path`) to the symbol with the same name in the `new_package`, adding `pom_dependency` to the `pom.xml` files of sub-modules if necessary.
+
+    If `deprecate_only`, the original file at `path` won't be deleted. Instead, it will be marked with `@Deprecated(since="[date and time]", forRemoval=true)`.
     """
     path = os.path.join(repo_dir.as_posix(), path)
     if not os.path.isfile(path):
@@ -417,5 +420,27 @@ def migrate(
         anchor="<dependencies>",
         content_to_ensure=pom_dependency,
     )
-    # Delete the hand-written source code file of this symbol.
+    if deprecate_only:
+        symbol_declaration_pattern = re.compile(rf"(class|interface|enum) {symbol}\b")
+        with open(path) as f:
+            lines = f.readlines()
+        is_deprecation_annotated = False
+        for i, line in enumerate(lines):
+            if symbol_declaration_pattern.match(line):
+                lines.insert(
+                    i,
+                    f'@Deprecated(since="{datetime.now().strftime("%c")}", forRemoval=true)',
+                )
+                is_deprecation_annotated = True
+                break
+        if is_deprecation_annotated:
+            logging.debug(f"Inserted deprecation annotation at line `{i}`.")
+            with open(path, "w") as f:
+                f.writelines(lines)
+        else:
+            logging.error(
+                "Deprecation is requested, but the symbol declaration can't be found in the file."
+            )
+        return
+    # Else, delete the hand-written source code file of this symbol.
     os.remove(path)
