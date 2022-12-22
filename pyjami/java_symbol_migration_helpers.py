@@ -435,7 +435,7 @@ def migrate(
             if symbol_declaration_pattern.search(line):
                 lines.insert(
                     i,
-                    f'@Deprecated(since="{datetime.now().strftime("%c")}", forRemoval=true)',
+                    f'@Deprecated(since="{datetime.now().strftime("%c")}", forRemoval=true){os.linesep}',
                 )
                 is_deprecation_annotated = True
                 break

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyjami"
-version = "0.1.5"
+version = "0.1.6"
 description = "Migrate Java code with Python."
 authors = ["Mingyang Li <mingyli@ebay.com>"]
 readme = "README.md"

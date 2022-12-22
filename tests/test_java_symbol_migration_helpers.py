@@ -5,6 +5,7 @@ from pyjami.java_symbol_migration_helpers import (
 )
 from pathlib import Path
 import os
+import re
 from shutil import copytree
 from difflib import unified_diff
 
@@ -136,6 +137,7 @@ def test_migrate_with_deprecation(tmp_path):
         deprecate_only=True,
     )
     assert original_file_path.is_file(), "The original Java file should remain."
-    assert (
-        "@Deprecated(" in original_file_path.read_text()
+    assert re.search(
+        rf'@Deprecated\(since=".+?", forRemoval=true\)\nclass Lorem',
+        original_file_path.read_text(),
     ), "Deprecation annotation should present in the file."
