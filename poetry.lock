@@ -320,14 +320,14 @@ test = ["hypothesis (>=5.5.3)", "pytest (>=6.0)", "pytest-xdist (>=1.31)"]
 
 [[package]]
 name = "pdoc"
-version = "12.3.1"
+version = "13.0.1"
 description = "API Documentation for Python Projects"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pdoc-12.3.1-py3-none-any.whl", hash = "sha256:c3f24f31286e634de9c76fa6e67bd5c0c5e74360b41dc91e6b82499831eb52d8"},
-    {file = "pdoc-12.3.1.tar.gz", hash = "sha256:453236f225feddb8a9071428f1982a78d74b9b3da4bc4433aedb64dbd0cc87ab"},
+    {file = "pdoc-13.0.1-py3-none-any.whl", hash = "sha256:16a24914280ed318896ad798674e2b0d11832297fdea95632fa472e3d171e247"},
+    {file = "pdoc-13.0.1.tar.gz", hash = "sha256:4d84056847728203b8789ca8a8d0c8003f25002b3caef3365f6f21a1e4228a1b"},
 ]
 
 [package.dependencies]
@@ -336,7 +336,7 @@ MarkupSafe = "*"
 pygments = ">=2.12.0"
 
 [package.extras]
-dev = ["black", "hypothesis", "mypy", "pytest", "pytest-cov", "pytest-timeout", "ruff", "tox", "types-pygments"]
+dev = ["black", "hypothesis", "mypy", "pygments (>=2.14.0)", "pytest", "pytest-cov", "pytest-timeout", "ruff", "tox", "types-pygments"]
 
 [[package]]
 name = "pluggy"
@@ -531,4 +531,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "d598e92742977ce7378186ec9a73971d1689cc4912928579f3474361de992155"
+content-hash = "085b14abbc4539e663b465c185ef3ea66a1268b3739685626a6c4f56147e7647"
