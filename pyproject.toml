@@ -10,7 +10,7 @@ packages = [{include = "pyjami"}]
 python = "^3.10"
 docopt = "^0.6.2"
 PyYAML = "^6.0"
-pandas = "^1.5.0"
+pandas = ">=1.5,<3.0"
 
 [tool.poetry.dev-dependencies]
 pdoc = "^14.3.0"
